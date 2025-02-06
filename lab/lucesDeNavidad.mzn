@@ -9,4 +9,4 @@ constraint forall(x in 1..longitud-2)(tira[x] != tira[x+1] \/ tira[x] != tira[x+
 constraint sum(x in 1..longitud)(consumo[tira[x]]) <= consumoMaximo;
 
 %ahora lo dificl
-constraint forall(x in 1..longitud)(forall(y in 1..nColores)((sum(z in 1..x where tira[z] = y)(1))<= ((x-1)/nColores) +1 ));
+constraint forall(x in 1..longitud)(forall(y in 1..nColores)(((sum(z in 1..x where tira[z] = y)(1))>=((x-1)/nColores) -1)));
