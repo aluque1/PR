@@ -1,12 +1,14 @@
-int : nCanciones = 2;
-int : vIda = 10;
-int : vVuelta = 10;
+int : nCanciones = 6;
+int : vIda = 20;
+int : vVuelta = 15;
 
-array[1..nCanciones, 1..2] of int : infoCanciones = [|10, 7|15, 4|];
+array[1..nCanciones, 1..2] of int : infoCanciones = [|5, 7|3, 10|10, 8|5,6|8, 8| 7, 6|];
 
-array[1..nCanciones] of var 0..2 : cancionesSelec;
+array[1..nCanciones] of var 0..1 : cancionesIda;
+array[1..nCanciones] of var 0..1 : cancionesVuelta;
 
-constraint (sum (x in 1..nCanciones where cancionesSelec[x] = 1)(infoCanciones[x, 1])) = vIda;
-constraint (sum (x in 1..nCanciones where cancionesSelec[x] = 2)(infoCanciones[x, 1])) = vVuelta;
+constraint (sum (x in 1..nCanciones)(infoCanciones[x, 1]* cancionesIda[x])) = vIda;
+constraint (sum (x in 1..nCanciones)(infoCanciones[x, 1] * cancionesVuelta[x])) = vVuelta;
+constraint forall(x in 1..nCanciones)(cancionesIda[x] != 1 \/ cancionesVuelta[x] != 1);
 
-solve maximize (sum (x in 1..nCanciones where cancionesSelec[x] != 0)(infoCanciones[x, 2]));
+solve maximize (sum (x in 1..nCanciones)(infoCanciones[x, 2] *cancionesVuelta[x]) + sum (x in 1..nCanciones)(infoCanciones[x, 2] *cancionesIda[x]));
