@@ -9,6 +9,6 @@ array[1..nCanciones] of var 0..1 : cancionesVuelta;
 
 constraint (sum (x in 1..nCanciones)(infoCanciones[x, 1]* cancionesIda[x])) = vIda;
 constraint (sum (x in 1..nCanciones)(infoCanciones[x, 1] * cancionesVuelta[x])) = vVuelta;
-constraint forall(x in 1..nCanciones)(cancionesIda[x] != 1 \/ cancionesVuelta[x] != 1);
+constraint forall(x in 1..nCanciones)(cancionesIda[x] * cancionesVuelta[x] = 0);
 
 solve maximize (sum (x in 1..nCanciones)(infoCanciones[x, 2] *cancionesVuelta[x]) + sum (x in 1..nCanciones)(infoCanciones[x, 2] *cancionesIda[x]));
