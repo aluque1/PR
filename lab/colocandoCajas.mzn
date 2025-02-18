@@ -10,5 +10,6 @@ array [1.. nCajas, 1..2] of var 0..max(hCaja, wCaja) : sol;
 %las coordenadas son correctas
 constraint forall(x in 1.. nCajas)((sol[x, 1] + cajas[x, 1]) <= wCaja /\ (sol[x, 2] + cajas[x, 2]) <= wCaja);
 
-%no se solapan
-constraint forall (x in 1..nCajas)(forall (y in x+1..nCajas)( (sol[y, 2] > (sol[x, 2] + cajas[x,2])) \/(sol[x, 1] < (sol[x, 1] + cajas[x,1]))));
+%no se solapan                                                          %se solapan en y
+constraint forall (x in 1..nCajas)(forall (y in 1..nCajas where y != x)(not((sol[y, 2] <= sol[x, 2])/\(sol[y, 2] + cajas[y,2] > sol[x, 2])) 
+                                                        \/ not((sol[y, 1] <= sol[x, 1])/\(sol[y, 1] + cajas[y,1] > sol[x, 1]))));
