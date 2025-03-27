@@ -12,6 +12,7 @@ int: MinDT; % Minimo de dias trabajados.
 int: A;  %numero minimo de trabajadores afines
 array[1..T, 1..T] of 0..1: afines;  %matriz de trabajadores afines entre si
 set of 1..T: R;  %empleados encargados
+array [1..T] of 0..1: TrabRot;  %trabajadores en turnos rotatorios
 
 int: total_turnos = N1+N2+N3; 
 
@@ -56,8 +57,17 @@ constraint forall(d in 1..D)(exists(h in 1..N1)(exists(r in R)(sol[d,h] = r)));
 constraint forall(d in 1..D)(exists(h in N1+1..N1+N2+1)(exists(r in R)(sol[d,h] = r)));
 constraint forall(d in 1..D)(exists(h in N1+N2+2..total_turnos)(exists(r in R)(sol[d,h] = r)));
 
+%1. restricciones adicionales
+constraint forall(t in 1.. T where TrabRot[t] = 1)(forall(d in 1..D-6)(not(exists(i in 1..N1)(sol[d,i] = t)/\exists(i in 1..N1)(sol[d+1,i] = t)/\
+                                                       exists(i in N1+1.. N1+N2+1)(sol[d+2,i] = t) /\exists(i in N1+1.. N1+N2+1)(sol[d+3,i] = t)
+                                                       /\ exists(i in N1+N2+2..total_turnos)(sol[d+4, i] = t)) 
+                                                       \/ (sum(x in 1..total_turnos where sol[d+5, x] = t)(1) = 0 /\
+                                                            sum(x in 1..total_turnos where sol[d+6, x] = t)(1) = 0)));
 
-
+%restricciones auxiliares por eficiencia
+constraint forall(d in 1..D)(forall(t in 1..N1-1)(sol[d,t] < sol[d, t+1]));
+constraint forall(d in 1..D)(forall(t in N1+1..N1+N2)(sol[d,t] < sol[d, t+1]));
+constraint forall(d in 1..D)(forall(t in N1+N2+2..total_turnos-1)(sol[d,t] < sol[d, t+1]));
 
 
 
