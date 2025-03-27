@@ -19,6 +19,9 @@ array[1..D, 1..total_turnos] of var 1..T : sol; % Que trabajadores hay en cada t
 
 % 1. satisfaccion
 constraint assert (T >= total_turnos, "No hay suficientes trabajadores para cubrir los turnos.");
+constraint forall (x in 1..D)(alldifferent([sol[x, y] | y in 1..N1])); 
+constraint forall (x in 1..D)(alldifferent([sol[x, y] | y in N1+1..N1+1+N2])); 
+constraint forall (x in 1..D)(alldifferent([sol[x, y] | y in N1+N2+2..total_turnos])); 
 
 % 2. satisfaccion
 constraint forall(x in 1..D) (alldifferent([sol[x, y] | y in 1..total_turnos]));
@@ -34,11 +37,11 @@ constraint assert ((T * MinDT/total_turnos) <= D, "Hay demasiados trabajadores p
 constraint forall(t in 1..T)((sum(i in 1..D, j in 1..total_turnos where sol[i,j] == t)(1)) >= MinDT);
 
 % 6. satisfaccion
-constraint forall(t in 1..T)(forall(d in 1..D-1)(not(sol[d, total_turnos] = t /\ sol[d+1, 1] = t)));
+constraint forall(t in 1..T)(forall(d in 1..D-1)(not(sum(x in N1+N2+2..total_turnos where sol[d,x] = t)(1) = 1 /\ 
+                                                      sum(y in 1..N1 where sol[d,y] = t)(1) = 1)));
 
 % 7. satisfaccion
-constraint forall(t in 1..T)(forall(d in 1..D-2 where sol[d, total_turnos] = t /\sol[d+1, total_turnos] = t)
-                              (sum(turn in 1..total_turnos where sol[d+2,turn] != t)(1) = 0));
+constraint forall(t in 1..T)(forall(d in 1..D-2)( not(sum(x in N1+N2+2..total_turnos where sol[d,x] = t)(1) = 1 /\ sum(x in N1+N2+2..total_turnos where sol[d+1,x] = t)(1) = 1) \/ sum(turn in 1..total_turnos where sol[d+2,turn] != t)(1) = 0));
                               
 %8. satisfaccion
 constraint assert(A<=T, "Hay demasiado pocos trabajadores para que sean afines");
