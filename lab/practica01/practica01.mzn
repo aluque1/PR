@@ -13,6 +13,7 @@ int: A;  %numero minimo de trabajadores afines
 array[1..T, 1..T] of 0..1: afines;  %matriz de trabajadores afines entre si
 set of 1..T: R;  %empleados encargados
 array [1..T] of 0..1: TrabRot;  %trabajadores en turnos rotatorios
+array[1..T] of 0..1: TrabDob;
 
 int: total_turnos = N1+N2+N3; 
 
@@ -25,13 +26,13 @@ constraint forall (x in 1..D)(alldifferent([sol[x, y] | y in N1+1..N1+1+N2]));
 constraint forall (x in 1..D)(alldifferent([sol[x, y] | y in N1+N2+2..total_turnos])); 
 
 % 2. satisfaccion
-constraint forall(x in 1..D) (alldifferent([sol[x, y] | y in 1..total_turnos]));
+constraint forall(x in 1..D) (alldifferent([sol[x, y] | y in 1..total_turnos where TrabDob[sol[x,y]] != 1]));
 
 % 3. satisfaccion
 constraint forall(t in 1..T) (forall(d in 1..D-MaxDT) ((sum(i in d..d+MaxDT, j in 1..total_turnos where sol[i,j] == t)(1)) <= MaxDT));
 
 %4. satisfaccion
-constraint forall(t in 1..T) (forall(d in 1..D-MaxDL) ((sum(i in d..d+MaxDL, j in 1..total_turnos where sol[i,j] == t)(1)) >= 1));
+constraint forall(t in 1..T where TrabDob[t] = 0) (forall(d in 1..D-MaxDL) ((sum(i in d..d+MaxDL, j in 1..total_turnos where sol[i,j] == t)(1)) >= 1));
 
 % 5. satisfaccion
 constraint assert ((T * MinDT/total_turnos) <= D, "Hay demasiados trabajadores para que todos trabajen el minimo.");
@@ -63,6 +64,15 @@ constraint forall(t in 1.. T where TrabRot[t] = 1)(forall(d in 1..D-6)(not(exist
                                                        /\ exists(i in N1+N2+2..total_turnos)(sol[d+4, i] = t)) 
                                                        \/ (sum(x in 1..total_turnos where sol[d+5, x] = t)(1) = 0 /\
                                                             sum(x in 1..total_turnos where sol[d+6, x] = t)(1) = 0)));
+
+%2. restricciones adicionales
+constraint forall(t in 1..T where TrabDob[t] = 1) (forall(d in 1..D-MaxDL) (
+(sum(i in d..d+MaxDL, j in 1..total_turnos where sol[i,j] == t)(1)) >= 1 \/ sum(i in 1..total_turnos where sol[max(1, d-1),i] = t)(1) = 2));
+constraint forall(t in 1..T where TrabDob[t] = 1)(forall(d in 1..D-1)(not(sum(i in 1..total_turnos where sol[d,i] = t)(1) = 2) 
+                                                                      \/sum(i in 1..total_turnos where sol[d+1,i] = t)(1) = 0));
+                                                                      
+constraint forall(t in 1..T where TrabDob[t] = 1)(forall(d in 1..D)(sum(i in 1..total_turnos where sol[d,i] = t)(1)<3));                                          
+
 
 %restricciones auxiliares por eficiencia
 constraint forall(d in 1..D)(forall(t in 1..N1-1)(sol[d,t] < sol[d, t+1]));
