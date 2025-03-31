@@ -24,3 +24,29 @@ afines = [|false,false,true,false,true,false,false,false,true,false,false,false
 R = {1,4,7,10};
 TrabRot = [true, false, false, false, true, false, false, false, false, false, true, false];
 TrabDob = [true, false, false, false, true, false, false, false, false, false, true, false];
+
+DiasInd = [|true, false, false, false, true
+           |true, false, false, false, true
+           |true, false, false, false, true
+           |true, false, false, false, true
+           |true, false, false, false, true
+           |true, false, false, false, true
+           |true, false, false, false, true
+           |true, false, false, false, true
+           |true, false, false, false, true
+           |true, false, false, false, true
+           |true, false, false, false, true
+           |true, false, false, false, true|];
+
+TurnosInd = [|true, false, false
+           |true, false, false
+           |true, false, false
+           |true, false, false
+           |true, false, false
+           |true, false, false
+           |true, false, false
+           |true, false, false
+           |true, false, false
+           |true, false, false
+           |true, false, false
+           |true, false, false|];

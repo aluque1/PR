@@ -13,7 +13,9 @@ int: A;  %numero minimo de trabajadores afines
 array[1..T, 1..T] of 0..1: afines;  %matriz de trabajadores afines entre si
 set of 1..T: R;  %empleados encargados
 array [1..T] of 0..1: TrabRot;  %trabajadores en turnos rotatorios
-array[1..T] of 0..1: TrabDob;
+array[1..T] of 0..1: TrabDob;    %trbajadores que doblan turnos
+array[1..T, 1..D] of 0..1: DiasInd; %dias indeseados por los trabajadores
+array[1..T, 1..3] of 0..1: TurnosInd;  %turnos indeseados por los trabajadores
 
 int: total_turnos = N1+N2+N3; 
 
@@ -32,7 +34,8 @@ constraint forall(x in 1..D) (alldifferent([sol[x, y] | y in 1..total_turnos whe
 constraint forall(t in 1..T) (forall(d in 1..D-MaxDT) ((sum(i in d..d+MaxDT, j in 1..total_turnos where sol[i,j] == t)(1)) <= MaxDT));
 
 %4. satisfaccion
-constraint forall(t in 1..T where TrabDob[t] = 0) (forall(d in 1..D-MaxDL) ((sum(i in d..d+MaxDL, j in 1..total_turnos where sol[i,j] == t)(1)) >= 1));
+constraint forall(t in 1..T where TrabDob[t] = 0) (forall(d in 1..D-MaxDL) ((sum(i in d..d+MaxDL, j in 1..total_turnos where 
+                                                                            sol[i,j] == t /\ DiasInd[t,i] != 1)(1)) >= 1));
 
 % 5. satisfaccion
 constraint assert ((T * MinDT/total_turnos) <= D, "Hay demasiados trabajadores para que todos trabajen el minimo.");
@@ -72,6 +75,13 @@ constraint forall(t in 1..T where TrabDob[t] = 1)(forall(d in 1..D-1)(not(sum(i 
                                                                       \/sum(i in 1..total_turnos where sol[d+1,i] = t)(1) = 0));
                                                                       
 constraint forall(t in 1..T where TrabDob[t] = 1)(forall(d in 1..D)(sum(i in 1..total_turnos where sol[d,i] = t)(1)<3));                                          
+
+%3. optimizacion
+
+%4. optimizacion
+solve minimize(sum(t in 1..T)(sum (d in 1..D)(sum(turn in 1.. N1 where sol[d,turn] = t /\ TurnosInd[t,1] = 1 )(1) +
+                sum(turn in N1+1.. N1+N2+1 where sol[d,turn] = t /\ TurnosInd[t,2] = 1 )(1) +
+                 sum(turn in N1+N2+2..total_turnos where sol[d,turn] = t /\ TurnosInd[t,3] = 1 )(1))));
 
 
 %restricciones auxiliares por eficiencia
