@@ -77,11 +77,15 @@ constraint forall(t in 1..T where TrabDob[t] = 1)(forall(d in 1..D-1)(not(sum(i 
 constraint forall(t in 1..T where TrabDob[t] = 1)(forall(d in 1..D)(sum(i in 1..total_turnos where sol[d,i] = t)(1)<3));                                          
 
 %3. optimizacion
+solve minimize(sum(t in 1..T)(exists(d in 1..D, i in 1.. total_turnos)(sol[d,i] = t)));
 
 %4. optimizacion
-solve minimize(sum(t in 1..T)(sum (d in 1..D)(sum(turn in 1.. N1 where sol[d,turn] = t /\ TurnosInd[t,1] = 1 )(1) +
-                sum(turn in N1+1.. N1+N2+1 where sol[d,turn] = t /\ TurnosInd[t,2] = 1 )(1) +
-                 sum(turn in N1+N2+2..total_turnos where sol[d,turn] = t /\ TurnosInd[t,3] = 1 )(1))));
+%solve minimize(sum(t in 1..T)(sum (d in 1..D)(                          %por cada dia, sumamos
+%                sum(turn in 1.. N1 where sol[d,turn] = t /\ TurnosInd[t,1] = 1 )(1) +    %si trabaja el primer turno si no quiere
+%                sum(turn in N1+1.. N1+N2+1 where sol[d,turn] = t /\ TurnosInd[t,2] = 1 )(1) +  %el segundo turno
+%                 sum(turn in N1+N2+2..total_turnos where sol[d,turn] = t /\ TurnosInd[t,3] = 1 )(1)))); %el último turno
+
+
 
 
 %restricciones auxiliares por eficiencia
