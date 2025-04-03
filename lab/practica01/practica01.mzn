@@ -92,24 +92,3 @@ solve minimize(sum(t in 1..T)(exists(d in 1..D, i in 1.. total_turnos)(sol[d,i] 
 constraint forall(d in 1..D)(forall(t in 1..N1-1)(sol[d,t] < sol[d, t+1]));
 constraint forall(d in 1..D)(forall(t in N1+1..N1+N2)(sol[d,t] < sol[d, t+1]));
 constraint forall(d in 1..D)(forall(t in N1+N2+2..total_turnos-1)(sol[d,t] < sol[d, t+1]));
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
