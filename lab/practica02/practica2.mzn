@@ -12,5 +12,26 @@ array [1..5] of int: inicial;  %aceites con los que empezamos
 int: PV;  %porcentaje de desviación con los aceites iniciales
 int: minB;   %beneficio mínimo
 
-array [1..6, 1..5] of 0..MCAP: cuantoComprar;
-array [1..6, 1..2] of 0..max(MAXV, MAXN): cuantoRefinar;
+array [1..6, 1..5] of int: aceiteTotal;  %el aceite total que tenemos este mes (antes de refinar)
+array [1..6, 1..5] of int: aceiteComprado;  %el aceite comprado este mes (solo para facilitar cálculos)
+array [1..6, 1..5] of 0..max(MAXV, MAXN): cuantoRefinar;  %el aceite total que refinamos este mes
+
+%cálculos de aceite comprado
+constraint forall(a in 1..5)(aceiteComprado[1,a] = inicial[a]- aceiteTotal[1,a]);  %el primer mes
+constraint forall(m in 2..6, a in 1..5)(aceiteComprado[m,a] = aceiteTotal[m-1, a] - aceiteTotal[m, a]);
+
+%no almacenar mas aceite vegetal del que podemos
+constraint forall(m in 1..6, a in 1..5)(aceiteTotal[m,a] <= MCAP);
+
+%no desviarnos de PV de cuanto podemos almacenar
+constraint forall(m in 1..6, a in 1..5)(abs(inicial[a] - (aceiteTotal[m,a] - cuantoRefinar[m,a]))/inicial[a] * 100 <= PV);
+
+%no refinar más aceite del que tenemos
+constraint forall(m in 1..6, a in 1..5)(cuantoRefinar[m,a] <= aceiteTotal[m,a]);  %refinar aceite vegetal
+%no refinar más aceite vegetal del que podemos
+constraint forall(m in 1..6)(cuantoRefinar[m,1] + cuantoRefinar[m,2] <= MAXV);
+%no refinar mas aceite no vegetal del que podemos
+constraint forall(m in 1..6)(cuantoRefinar[m,3] + cuantoRefinar[m,4] + cuantoRefinar[m,5] <= MAXN);
+
+%calcular beneficios finales
+constraint sum(m in 1..6, a in 1..5)(cuantoRefinar[m,a]*VALOR - aceiteComprado[m,a]*precios[m,a]) >= minB;
