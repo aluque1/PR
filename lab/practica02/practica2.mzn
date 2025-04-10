@@ -23,8 +23,8 @@ constraint forall(m in 2..6, a in 1..5)(aceiteComprado[m,a] = aceiteTotal[m-1, a
 %no almacenar mas aceite vegetal del que podemos
 constraint forall(m in 1..6, a in 1..5)(aceiteTotal[m,a] <= MCAP);
 
-%no desviarnos de PV de cuanto podemos almacenar
-constraint forall(m in 1..6, a in 1..5)(abs(inicial[a] - (aceiteTotal[m,a] - cuantoRefinar[m,a]))/inicial[a] * 100 <= PV);
+%no desviarnos de PV al final
+constraint forall(a in 1..5)(abs(inicial[a] - (aceiteTotal[6,a] - cuantoRefinar[6,a]))/inicial[a] * 100 <= PV);
 
 %no refinar más aceite del que tenemos
 constraint forall(m in 1..6, a in 1..5)(cuantoRefinar[m,a] <= aceiteTotal[m,a]);  %refinar aceite vegetal
