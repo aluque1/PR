@@ -14,7 +14,7 @@ int: MinB;   %beneficio mínimo
 
 array [1..6, 1..5] of var 0..: aceiteTotal;  %el aceite total que tenemos este mes (antes de refinar)
 array [1..6, 1..5] of var 0..: aceiteComprado;  %el aceite comprado este mes (solo para facilitar cálculos)
-array [1..6, 1..5] of var 0..max(MAXV, MAXN): cuantoRefinar;  %el aceite total que refinamos este mes
+array [1..6, 1..5] of var 0..max(MAXV, MAXN): cuantoRefinar;  %el aceite total que refinamos este mes 
 
 %cálculos de aceite comprado
 constraint forall(a in 1..5)(aceiteTotal[1,a] = inicial[a] + aceiteComprado[1,a]);  %el primer mes
@@ -34,6 +34,9 @@ constraint forall(m in 1..6)(cuantoRefinar[m,1] + cuantoRefinar[m,2] <= MAXV);
 constraint forall(m in 1..6)(cuantoRefinar[m,3] + cuantoRefinar[m,4] + cuantoRefinar[m,5] <= MAXN);
 
 %que la densidad final sea la adecuada
+constraint forall(m in 1..6 where cuantoRefinar[m,3] > 0 \/ cuantoRefinar[m, 4] > 0 \/ cuantoRefinar[m,5] > 0)  %si hay aceites no vegetales
+(sum(a in 1..5)(cuantoRefinar[m,a]*dureza[a]) >= MinD * sum(a in 1..5)(cuantoRefinar[m,a]) /\ 
+sum(a in 1..5)(cuantoRefinar[m,a]*dureza[a]) <= MaxD * sum(a in 1..5)(cuantoRefinar[m,a])); 
 
 %calcular beneficios finales
-constraint sum(m in 1..6, a in 1..5)(cuantoRefinar[m,a]*VALOR - aceiteComprado[m,a]*precios[m,a]) >= MinB;
+solve maximize sum(m in 1..6, a in 1..5)(cuantoRefinar[m,a]*VALOR - aceiteComprado[m,a]*precios[m,a]);
