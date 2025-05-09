@@ -16,19 +16,19 @@ for i in range(0,5):
 
 precios = []
 for i in range(0,6):
-    tpre1 = input().split()
+    tpre = input().split()
     lpre = []
     for j in range(0,5):
         lpre.append(int(tpre[j]))
-    coefs.append(lpre)
+    precios.append(lpre) # Esto lo cambio porque no tenemos como tan algo que se llame coefs
 
 MAXV = int(input())     #cuando aceite vegetal podemos refinar como máximo
-MAXN = int(input()) #cuanto aceite no vegetal podemos refinar como máximo
-MCAP = int(input()) #cuanto aceite de cada tipo podemos almacenar
-CA = int(input())   #coste de almacenamiento de los aceites. Los aceites refinados no pueden almacenarse
-MinD = float(input())   #dureza minima del aceite no vegatal
+MAXN = int(input())     #cuanto aceite no vegetal podemos refinar como máximo
+MCAP = int(input())     #cuanto aceite de cada tipo podemos almacenar
+CA = int(input())       #coste de almacenamiento de los aceites. Los aceites refinados no pueden almacenarse
+MinD = float(input())   #dureza minima del a2ceite no vegatal
 MaxD = float(input())   #dureza máxima del aceite no vegatal
-MinB = int(input())   #beneficio mínimo
+MinB = int(input())     #beneficio mínimo
 
 inicial = []    #aceites con los que empezamos
 aux = input().split()
@@ -54,8 +54,8 @@ s = SolverFor("QF_LIA")
 
 
 # Definicion de variables de la solucion
-int a = 0
-aceiteTotal = []    #aceite que tenemos este mes, antes de refinar. matriz 6x5
+a = 0
+aceiteTotal = []        #aceite que tenemos este mes, antes de refinar. matriz 6x5
 for i in range(0, 6):
     aux = []
     for j in range (0, 5):
@@ -63,7 +63,7 @@ for i in range(0, 6):
         a+=1
     aceiteTotal.append(aux)
 
-aceiteComprado = []    #aceite que compramos este mes. matriz 6x5
+aceiteComprado = []     #aceite que compramos este mes. matriz 6x5
 for i in range(0, 6):
     aux = []
     for j in range (0, 5):
@@ -96,12 +96,12 @@ for j in range(1, 6):
 #constraint forall(m in 1..6, a in 1..5)(aceiteTotal[m,a] - cuantoRefinar[m,a] <= MCAP);
 for j in range(0, 6):
     for i in range(0, 5):
-        s.add(aceiteTotal[j][i] - cuantoRefinar[j-1][i]) <= MCAP)
+        s.add((aceiteTotal[j][i] - cuantoRefinar[j-1][i]) <= MCAP)
 
 #no desviarnos de PV al final
 #constraint forall(a in 1..5)(int2float(abs((inicial[a] - (aceiteTotal[6, a] - cuantoRefinar[6,a]))))/int2float(inicial[a]) * 100 <= PV);
 for i in range(0,5):
-    s.add((abs(inicial[i] - aceiteTotal[5,i] + cuantoRefinar[5,i])/inicial[i] * 100) <= PV)
+    s.add((abs(inicial[i] - aceiteTotal[5][i] + cuantoRefinar[5][i])/inicial[i] * 100) <= PV)
 
 #no refinar más aceite del que tenemos
 #constraint forall(m in 1..6, a in 1..5)(cuantoRefinar[m,a] <= aceiteTotal[m,a]);
@@ -112,19 +112,21 @@ for j in range(0, 6):
 #no refinar más aceite vegetal del que podemos
 #constraint forall(m in 1..6)(cuantoRefinar[m,1] + cuantoRefinar[m,2] <= MAXV);
 for j in range(0, 6):
-    s.add((cuantoRefinar[j][0] + cuantoRefinar[j,1]) <= MAXV)
+    s.add((cuantoRefinar[j][0] + cuantoRefinar[j][1]) <= MAXV)
 
 #no refinar mas aceite no vegetal del que podemos
 #constraint forall(m in 1..6)(cuantoRefinar[m,3] + cuantoRefinar[m,4] + cuantoRefinar[m,5] <= MAXN);
 for j in range(0, 6):
-    s.add((cuantoRefinar[j][2] + cuantoRefinar[j,3]+ cuantoRefinar[j,4]) <= MAXN)
+    s.add((cuantoRefinar[j][2] + cuantoRefinar[j][3]+ cuantoRefinar[j][4]) <= MAXN)
 
 
 #FIN DE CONSTRAINTS
 
 print(s.check())
 
-#if s.check == z3.sat:
-for i in range(0, k):
+if s.check() == z3.sat:
     print(s.model().eval(equises[i]))
+else:
+    print("No hay solución")
+    exit(0)
 
