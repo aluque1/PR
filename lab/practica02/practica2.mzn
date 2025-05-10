@@ -12,6 +12,9 @@ array [1..5] of int: inicial;  %aceites con los que empezamos
 float: PV;  %porcentaje de desviación con los aceites iniciales
 int: MinB;   %beneficio mínimo
 
+array [1..6] of int: mensualMin;  %minimo numero de aceites q tenemos q usar cada mes
+array [1..5] of int: cantidadMin; %cantidad minima de aceite q podemos usar si usamos aceite
+
 array [1..6, 1..5] of var 0..MCAP+max(MAXV, MAXN): aceiteTotal;  %el aceite total que tenemos este mes (antes de refinar)
 array [1..6, 1..5] of var 0..MCAP+max(MAXV, MAXN): aceiteComprado;  %el aceite comprado este mes (solo para facilitar cálculos)
 array [1..6, 1..5] of var 0..max(MAXV, MAXN): cuantoRefinar;  %el aceite total que refinamos este mes 
@@ -42,6 +45,17 @@ constraint forall(m in 1..6 where cuantoRefinar[m,3] > 0 \/ cuantoRefinar[m, 4] 
 (sum(a in 1..5)(cuantoRefinar[m,a]*dureza[a]) >= MinD * sum(a in 1..5)(cuantoRefinar[m,a]) /\ 
 sum(a in 1..5)(cuantoRefinar[m,a]*dureza[a]) <= MaxD * sum(a in 1..5)(cuantoRefinar[m,a])); 
 
+%llegar a los benificios minimos
 constraint sum(m in 1..6, a in 1..5)(cuantoRefinar[m,a]*VALOR - aceiteComprado[m,a]*precios[m,a]) >= MinB;
+
+%RESTRICCIONES ADICIONALES
+
+%usar K aceites minimos cada mes
+constraint forall(m in 1..6)(sum(a in 1..5 where cuantoRefinar[m,a] >0)(1) >= mensualMin[m]);
+
+%usar un minimo de T si usamos un aceite
+constraint forall(m in 1..6)(forall(a in 1..5 where cuantoRefinar[m,a] >0)(cuantoRefinar[m,a] >= cantidadMin[a]));
+
 %calcular beneficios finales
 solve maximize sum(m in 1..6, a in 1..5)(cuantoRefinar[m,a]*VALOR - aceiteComprado[m,a]*precios[m,a]);
+

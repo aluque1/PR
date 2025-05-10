@@ -37,6 +37,15 @@ for i in range(0,5):
 
 PV = float(input()) #porcentaje de desviación con los aceites con los q empezamos
 
+mensualMin = []     #numero minimo de aceites q tenemos q usar cada mes
+aux = input().split()
+for i in range(0,6):
+    mensualMin.append(int(aux[i]))
+
+cantidadMin = []    #cantidad minima q tenemos q usar de un aceite si lo usamos
+aux = input().split()
+for i in range(0,6):
+    cantidadMin.append(int(aux[i]))
 # end of parameters
 
 
@@ -162,8 +171,23 @@ for j in range(0,6):
 benTotal = 0
 for j in range (0,6):
     benTotal += calCoste(j)
-    
 s.add(benTotal >= MinB)
+
+#CONSTRAINTS DE RESTRICIONES OPCIONALES
+
+#usar K aceites minimos cada mes
+#constraint forall(m in 1..6)(sum(a in 1..5 where cuantoRefinar[m,a] >0)(1) >= mensualMin[m]);
+aceitesUsados = 0;
+for j in range (0,6):
+    for i in range(0,5):
+        aceitesUsados+= If(cuantoRefinar[j][i] > 0, 1, 0)
+     s.add(aceitesUsados >= mesualMin[j])
+
+#usar un minimo de T si usamos un aceite
+#constraint forall(m in 1..6)(forall(a in 1..5 where cuantoRefinar[m,a] >0)(cuantoRefinar[m,a] >= cantidadMin[a]));
+for j in range (0,6):
+    for i in range(0,5):
+        s.add(Or(cuantoRefinar[j][i] >= cantidadMin[i], cuantoRefinar == 0))
 
 #minimizar el número de aceites usados
 aceitesUsados = 0;
@@ -173,6 +197,8 @@ for j in range (0,6):
 s.minimize(aceitesUsados);
 
 #FIN DE CONSTRAINTS
+
+
 
 print(s.check())
 
