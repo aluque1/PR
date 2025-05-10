@@ -67,7 +67,7 @@ def calCoste(i):
 #fin de las definiciones
 
 
-s = SolverFor("QF_LIA")
+s = Optimize()
 
 
 # Definicion de variables de la solucion
@@ -108,6 +108,15 @@ for i in range(0, 5):
 for j in range(1, 6):
     for i in range(0, 5):
         s.add(aceiteTotal[j][i] == (aceiteTotal[j-1][i] - cuantoRefinar[j-1][i] + aceiteComprado[j][i]))
+
+#constraints para reducir el espacio de búsqueda
+#constraint forall(a in 1..5)(aceiteComprado[1,a] <= inicial[a] + cuantoRefinar[1,a]);  %el primer mes
+for i in range(0, 5):
+    s.add(aceiteComprado[0][i] <= (inicial[i] + cuantoRefinar[0][i]))
+#constraint forall(m in 2..6, a in 1..5)(aceiteComprado[m,a] <= MCAP - aceiteTotal[m-1, a] + cuantoRefinar[m,a]);
+for j in range(1, 6):
+    for i in range(0, 5):
+        s.add(aceiteComprado[j][i] <= MCAP - aceiteTotal[j-1][i] + cuantoRefinar[j-1][i])
 
 #no almacenar mas aceite del que podemos
 #constraint forall(m in 1..6, a in 1..5)(aceiteTotal[m,a] - cuantoRefinar[m,a] <= MCAP);
@@ -155,6 +164,13 @@ for j in range (0,6):
     benTotal += calCoste(j)
     
 s.add(benTotal >= MinB)
+
+#minimizar el número de aceites usados
+aceitesUsados = 0;
+for j in range (0,6):
+    for i in range(0,5):
+        aceitesUsados+= If(cuantoRefinar[j][i] > 0, 1, 0)
+s.minimize(aceitesUsados);
 
 #FIN DE CONSTRAINTS
 
