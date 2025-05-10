@@ -19,6 +19,12 @@ array [1..6, 1..5] of var 0..max(MAXV, MAXN): cuantoRefinar;  %el aceite total q
 %cálculos de aceite comprado
 constraint forall(a in 1..5)(aceiteTotal[1,a] = inicial[a] + aceiteComprado[1,a]);  %el primer mes
 constraint forall(m in 2..6, a in 1..5)(aceiteTotal[m,a] = aceiteTotal[m-1, a] - cuantoRefinar[m-1,a] + aceiteComprado[m, a]);  %el resto  
+%constraints para reducir el espacio de búsqueda
+constraint forall(a in 1..5)(aceiteComprado[1,a] <= inicial[a] + cuantoRefinar[1,a]);  %el primer mes
+constraint forall(m in 2..6, a in 1..5)(aceiteComprado[m,a] <= MCAP - aceiteTotal[m-1, a] + cuantoRefinar[m,a]);
+constraint forall(m in 1..6, a in 1..5)(aceiteTotal[m,a] <= MCAP + cuantoRefinar[m,a]);
+constraint forall(m in 1..6, a in 1..2)(cuantoRefinar[m,a] <= MAXV);
+constraint forall(m in 1..6, a in 1..2)(cuantoRefinar[m,a] <= MAXN);
 
 %no almacenar mas aceite del que podemos
 constraint forall(m in 1..6, a in 1..5)(aceiteTotal[m,a] - cuantoRefinar[m,a] <= MCAP);
@@ -38,5 +44,6 @@ constraint forall(m in 1..6 where cuantoRefinar[m,3] > 0 \/ cuantoRefinar[m, 4] 
 (sum(a in 1..5)(cuantoRefinar[m,a]*dureza[a]) >= MinD * sum(a in 1..5)(cuantoRefinar[m,a]) /\ 
 sum(a in 1..5)(cuantoRefinar[m,a]*dureza[a]) <= MaxD * sum(a in 1..5)(cuantoRefinar[m,a])); 
 
+constraint sum(m in 1..6, a in 1..5)(cuantoRefinar[m,a]*VALOR - aceiteComprado[m,a]*precios[m,a]) >= MinB;
 %calcular beneficios finales
 solve maximize sum(m in 1..6, a in 1..5)(cuantoRefinar[m,a]*VALOR - aceiteComprado[m,a]*precios[m,a]);
