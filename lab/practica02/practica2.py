@@ -47,6 +47,23 @@ def n_equis(i):
 def abs(x):
     return If(x >= 0,x,-x)
 
+def calDurezaTotal(_aceites):
+    else:
+        asum = _aceites[0]*dureza[0]
+        for i in range(1, 5):
+            asum += _aceites[i]*dureza[i-1]
+
+    return asum
+
+#cuantoRefinar[m,a]*VALOR - aceiteComprado[m,a]*precios[m,a]
+def calCoste(i):
+    else:
+        asum = cuantoRefinar[i][0]*VALOR - aceiteComprado[i][0]*precios[i][0]
+        for j in range(1, 5):
+            asum += cuantoRefinar[i][j]*VALOR - aceiteComprado[i][j]*precios[i][j]
+
+    return asum
+
 #fin de las definiciones
 
 
@@ -119,13 +136,40 @@ for j in range(0, 6):
 for j in range(0, 6):
     s.add((cuantoRefinar[j][2] + cuantoRefinar[j][3]+ cuantoRefinar[j][4]) <= MAXN)
 
+#q la densidad final sea la adecuada
+#constraint forall(m in 1..6 where cuantoRefinar[m,3] > 0 \/ cuantoRefinar[m, 4] > 0 \/ cuantoRefinar[m,5] > 0)  %si hay aceites no vegetales
+#(sum(a in 1..5)(cuantoRefinar[m,a]*dureza[a]) >= MinD * sum(a in 1..5)(cuantoRefinar[m,a]) /\ 
+#sum(a in 1..5)(cuantoRefinar[m,a]*dureza[a]) <= MaxD * sum(a in 1..5)(cuantoRefinar[m,a]));
+
+for j in range(0,6):
+    aceitesNoVegetales = Or(cuantoRefinar[j][3] > 0, cuantoRefinar[j][3] > 0, cuantoRefinar[j][4] > 0)
+    aceitesUsados = 0
+    for i in range (0,5):
+        aceitesUsados += cuantoRefinar[j][i];
+    s.add(Or(Not(aceitesNoVegetales), And(calDurezaTotal(cuantoRefinar[j]) >= MinD * aceitesUsados, calDurezaTotal(cuantoRefinar[j]) >= MaxD * aceitesUsados)))
+
+#llegar a unos beneficios finales
+#cada mes, el coste de cada aceite se calcula como cuantoRefinar[m,a]*VALOR - aceiteComprado[m,a]*precios[m,a]
+benTotal = 0
+for j in range (0,6):
+    benTotal += calCoste(j)
+    
+s.add(benTotal >= MinB)
 
 #FIN DE CONSTRAINTS
 
 print(s.check())
 
 if s.check() == z3.sat:
-    print(s.model().eval(equises[i]))
+    for i in range 6:
+        for i in range 5:
+            print(s.model().eval(aceiteTotal[i][j]))
+    for i in range 6:
+        for i in range 5:
+            print(s.model().eval(aceiteComprado[i][j]))
+    for i in range 6:
+        for i in range 5:
+            print(s.model().eval(cuantoRefinar[i][j]))
 else:
     print("No hay solución")
     exit(0)
