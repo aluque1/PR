@@ -1,23 +1,26 @@
 %aceites totales: 5. aceites vegetales 1,2. aceites no vegetales: 3, 4, 5
-int: VALOR;  %por cuanto vendemos el aceite
+int: VALOR; %por cuanto vendemos el aceite
 int: MAXV;  %cuando aceite vegetal podemos refinar como máximo
-int: MAXN;   %cuanto aceite no vegetal podemos refinar como máximo
+int: MAXN;  %cuanto aceite no vegetal podemos refinar como máximo
 int: MCAP;  %cuanto aceite de cada tipo podemos almacenar
-int: CA; %coste de almacenamiento de los aceites. Los aceites refinados no pueden almacenarse
+int: CA;    %coste de almacenamiento de los aceites. Los aceites refinados no pueden almacenarse
 array [1..5] of float: dureza;
-float: MinD; %dureza minima del aceite no vegatal
-float: MaxD;  %dureza máxima del aceite no vegetal 
+float: MinD;    %dureza minima del aceite no vegatal
+float: MaxD;    %dureza máxima del aceite no vegetal 
 array [1..6, 1..5] of int: precios;
-array [1..5] of int: inicial;  %aceites con los que empezamos
+array [1..5] of int: inicial;   %aceites con los que empezamos
 float: PV;  %porcentaje de desviación con los aceites iniciales
-int: MinB;   %beneficio mínimo
+int: MinB;  %beneficio mínimo
 
 array [1..6] of int: mensualMin;  %minimo numero de aceites q tenemos q usar cada mes
 array [1..5] of int: cantidadMin; %cantidad minima de aceite q podemos usar si usamos aceite
+array [1..5, 1..5] of int: incompatibles; %aceites incompatibles, si el aceite i es incompatible con el j, incompatibles[i,j] = 1 else 0
+array [1..5, 1..5] of int: requeridos; %aceites requeridos, si el aceite i requiere el j, requeridos[i,j] = 1 else 0
 
-array [1..6, 1..5] of var 0..MCAP+max(MAXV, MAXN): aceiteTotal;  %el aceite total que tenemos este mes (antes de refinar)
+array [1..6, 1..5] of var 0..MCAP+max(MAXV, MAXN): aceiteTotal; %el aceite total que tenemos este mes (antes de refinar)
 array [1..6, 1..5] of var 0..MCAP+max(MAXV, MAXN): aceiteComprado;  %el aceite comprado este mes (solo para facilitar cálculos)
-array [1..6, 1..5] of var 0..max(MAXV, MAXN): cuantoRefinar;  %el aceite total que refinamos este mes 
+array [1..6, 1..5] of var 0..max(MAXV, MAXN): cuantoRefinar;    %el aceite total que refinamos este mes 
+
 
 %cálculos de aceite comprado
 constraint forall(a in 1..5)(aceiteTotal[1,a] = inicial[a] + aceiteComprado[1,a]);  %el primer mes
@@ -54,7 +57,18 @@ constraint sum(m in 1..6, a in 1..5)(cuantoRefinar[m,a]*VALOR - aceiteComprado[m
 constraint forall(m in 1..6)(sum(a in 1..5 where cuantoRefinar[m,a] >0)(1) >= mensualMin[m]);
 
 %usar un minimo de T si usamos un aceite
-constraint forall(m in 1..6)(forall(a in 1..5 where cuantoRefinar[m,a] >0)(cuantoRefinar[m,a] >= cantidadMin[a]));
+constraint forall(m in 1..6)(forall(a in 1..5 where cuantoRefinar[m,a] > 0)(cuantoRefinar[m,a] >= cantidadMin[a]));
+
+%aceites incompatibles: si uno se refina, el otro no puede refinarse
+constraint forall(m in 1..6)(forall( a in 1..5, b in 1..5 where incompatibles[a,b] == 1)(
+    (cuantoRefinar[m,a] > 0 -> cuantoRefinar[m,b] == 0) 
+)); /* si no fuera simetrico se haria con /\
+    (cuantoRefinar[m,b] > 0 -> cuantoRefinar[m,a] == 0) tambien */
+
+%aceites requeridos: si uno se refina, el otro tiene que refinarse
+constraint forall(m in 1..6)(forall( a in 1..5, b in 1..5 where requeridos[a,b] == 1)(
+    (cuantoRefinar[m,a] > 0 <-> cuantoRefinar[m,b] > 0)
+));
 
 %calcular beneficios finales
 solve maximize sum(m in 1..6, a in 1..5)(cuantoRefinar[m,a]*VALOR - aceiteComprado[m,a]*precios[m,a]);
