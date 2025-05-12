@@ -209,21 +209,22 @@ for j in range (0,6):
 
 
 # aceites requeridos constraint forall(m in 1..6)(forall( a in 1..5, b in 1..5 where requeridos[a,b] == 1)((cuantoRefinar[m,a] > 0 <-> cuantoRefinar[m,b] > 0)
-penalty_req = 10
-for m in range(6):       
-    for a in range(5):    
+penalty_req = 100
+for m in range(6):
+    for a in range(5):
         for b in range(5):
             if requeridos[a][b] == 1:
-                s.add_soft((cuantoRefinar[m][a] > 0) == (cuantoRefinar[m][b] > 0), weight=penalty_req)
+                # Soft constraint: if a is refined, b should also be refined
+                s.add_soft(Implies(cuantoRefinar[m][a] > 0, cuantoRefinar[m][b] > 0), weight=penalty_req)
 
 # aceites incompatibles constraint forall(m in 1..6)(forall( a in 1..5, b in 1..5 where incompatibles[a,b] == 1)( (cuantoRefinar[m,a] > 0 -> cuantoRefinar[m,b] == 0)
-penalty_incomp = 1000
-for m in range(6):       
-    for a in range(5):    
+penalty_incompatibles = 100
+for m in range(6):
+    for a in range(5):
         for b in range(5):
             if incompatibles[a][b] == 1:
-                # Soft constraint: if a is refined, b shouldn't be
-                s.add_soft(Or(cuantoRefinar[m][a] == 0, cuantoRefinar[m][b] == 0), weight=penalty_incomp)
+                # Soft constraint: if a is refined, b should not be refined
+                s.add_soft(Implies(cuantoRefinar[m][a] > 0, cuantoRefinar[m][b] == 0), weight=penalty_incompatibles)
 
 
 #minimizar el número de aceites usados
