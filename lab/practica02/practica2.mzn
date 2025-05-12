@@ -17,6 +17,8 @@ array [1..5] of int: cantidadMin; %cantidad minima de aceite q podemos usar si u
 array [1..5, 1..5] of int: incompatibles; %aceites incompatibles, si el aceite i es incompatible con el j, incompatibles[i,j] = 1 else 0
 array [1..5, 1..5] of int: requeridos; %aceites requeridos, si el aceite i requiere el j, requeridos[i,j] = 1 else 0
 
+array [1..5] of int: costeRefinamiento;  %el coste de refinar una tonelada de cada aceite
+
 array [1..6, 1..5] of var 0..MCAP+max(MAXV, MAXN): aceiteTotal; %el aceite total que tenemos este mes (antes de refinar)
 array [1..6, 1..5] of var 0..MCAP+max(MAXV, MAXN): aceiteComprado;  %el aceite comprado este mes (solo para facilitar cálculos)
 array [1..6, 1..5] of var 0..max(MAXV, MAXN): cuantoRefinar;    %el aceite total que refinamos este mes 
@@ -70,6 +72,8 @@ constraint forall(m in 1..6)(forall( a in 1..5, b in 1..5 where requeridos[a,b] 
     (cuantoRefinar[m,a] > 0 <-> cuantoRefinar[m,b] > 0)
 ));
 
+%RESTRICCION PROPUESTA
+%añadir costes de refinamiento al cálculo final de beneficios
 %calcular beneficios finales
-solve maximize sum(m in 1..6, a in 1..5)(cuantoRefinar[m,a]*VALOR - aceiteComprado[m,a]*precios[m,a]);
+solve maximize sum(m in 1..6, a in 1..5)(cuantoRefinar[m,a]*VALOR - aceiteComprado[m,a]*precios[m,a] - cuantoRefinar[m,a]*costeRefinamiento[a]);
 
