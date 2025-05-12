@@ -206,15 +206,10 @@ for j in range (0,6):
     for i in range(0,5):
         s.add(Or(cuantoRefinar[j][i] >= cantidadMin[i], cuantoRefinar == 0))
 
-#minimizar el número de aceites usados
-aceitesUsados = 0;
-for j in range (0,6):
-    for i in range(0,5):
-        aceitesUsados+= If(cuantoRefinar[j][i] > 0, 1, 0)
-s.minimize(aceitesUsados);
+
 
 # aceites requeridos constraint forall(m in 1..6)(forall( a in 1..5, b in 1..5 where requeridos[a,b] == 1)((cuantoRefinar[m,a] > 0 <-> cuantoRefinar[m,b] > 0)
-penalty_req = 1000
+penalty_req = 10
 for m in range(6):       
     for a in range(5):    
         for b in range(5):
@@ -229,6 +224,13 @@ for m in range(6):
             if incompatibles[a][b] == 1:
                 # Soft constraint: if a is refined, b shouldn't be
                 s.add_soft(Or(cuantoRefinar[m][a] == 0, cuantoRefinar[m][b] == 0), weight=penalty_incomp)
+
+
+#minimizar el número de aceites usados
+aceitesUsados = 0;
+for j in range (0,6):
+    for i in range(0,5):
+        aceitesUsados+= If(cuantoRefinar[j][i] > 0, 1, 0)
 s.minimize(aceitesUsados);
 
 #FIN DE CONSTRAINTS
